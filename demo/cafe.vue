@@ -86,7 +86,7 @@ const filteredItems = computed(() => items.filter(i => i.category === activeCate
   color: #78716c; transition: all 0.2s;
 }
 .tab.active { background: #92400e; color: #fff; border-color: #92400e; }
-.menu-list { display: flex; flex-direction: column; gap: 10px; }
+.menu-list { display: flex; flex-direction: column; gap: 10px; position: relative; min-height: 180px; }
 .menu-card {
   background: #fff; border: 1px solid #e7e5e4; border-radius: 10px;
   padding: 14px 16px; transition: box-shadow 0.15s;
@@ -97,6 +97,7 @@ const filteredItems = computed(() => items.filter(i => i.category === activeCate
 .card-price { font-weight: 700; color: #b45309; font-size: 14px; }
 .card-desc { font-size: 11.5px; color: #a8a29e; margin-top: 4px; }
 .foot { text-align: center; padding: 32px; font-size: 11px; color: #a8a29e; }
-.fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
+.fade-enter-active { transition: opacity 0.2s; }
+.fade-leave-active { transition: opacity 0.15s; position: absolute; left: 0; right: 0; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>
