@@ -270,8 +270,11 @@
     }
     .pane-btn:hover { background: rgba(0,0,0,.06); color: var(--c-text); }
     .pane-btn.active { color: var(--c-accent); background: var(--c-accent-bg); }
-    .pane-content { flex: 1; min-height: 0; display: flex; }
+    .pane-content { flex: 1; min-height: 0; display: flex; position: relative; }
     .pane-content iframe { flex: 1; min-width: 0; border: 0; background: var(--c-bg); display: block; }
+    .pane-loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--c-bg); color: #9ca3af; font-size: 13px; gap: 10px; z-index: 1; }
+    .pane-loading .pl-spinner { width: 22px; height: 22px; border: 2.5px solid #e5e7eb; border-top-color: #6b7280; border-radius: 50%; animation: pl-spin .8s linear infinite; }
+    @keyframes pl-spin { to { transform: rotate(360deg); } }
     .pane-content .code-view {
       flex: 1; min-width: 0; overflow: auto; padding: 12px;
       background: var(--c-bg-code);
@@ -408,6 +411,7 @@
 
   // ── File type detection ──
   function fileType(name) {
+    if (/\.svelte$/i.test(name)) return "svelte";
     if (/\.vue$/i.test(name)) return "vue";
     if (/\.html?$/i.test(name)) return "html";
     if (/\.tsx$/i.test(name)) return "tsx";
@@ -524,6 +528,50 @@ createApp(__opts__).mount('#app');`;
     iframe.contentWindow.postMessage({ type: "RUN_VUE", template, code }, "*");
   }
 
+  // ── Svelte SFC ──
+  function makeSvelteIframeDoc() {
+    return `<!doctype html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>:root{color-scheme:light}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.err{padding:14px;margin:12px;border:1px solid rgba(239,68,68,.5);border-radius:8px;background:rgba(239,68,68,.06);white-space:pre-wrap;font-family:ui-monospace,monospace;font-size:12px;color:#b91c1c}
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;color:#9ca3af;font-size:13px;gap:12px}
+.spinner{width:24px;height:24px;border:2.5px solid #e5e7eb;border-top-color:#6b7280;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}</style>
+</head><body><div id="app"><div class="loading"><div class="spinner"></div>Svelte \u30B3\u30F3\u30D1\u30A4\u30E9\u3092\u8AAD\u307F\u8FBC\u307F\u4E2D\u2026</div></div>
+<script type="module">
+import { compile } from "https://esm.sh/svelte@4/compiler";
+
+function showError(e) {
+  document.getElementById("app").innerHTML = '<div class="err">' + ((e && (e.stack || e.message)) || e) + '<\\/div>';
+}
+let pending = null;
+function runSvelte(src) {
+  try {
+    const result = compile(src, { css: "injected", filename: "Component.svelte" });
+    let code = result.js.code
+      .replace(/(from\\s*|import\\s*)["']svelte(\\/[\\w./-]+)?["']/g, (m, pre, sub) => pre + '"https://esm.sh/svelte@4' + (sub || '') + '"');
+    code += "\\nnew Component({ target: document.getElementById('app') });";
+    document.getElementById("app").innerHTML = "";
+    const s = document.createElement("script");
+    s.type = "module";
+    s.textContent = code;
+    document.head.appendChild(s);
+  } catch (e) { showError(e); }
+}
+window.addEventListener("message", (ev) => {
+  if (!ev.data || ev.data.type !== "RUN_SVELTE") return;
+  if (typeof compile === "function") { runSvelte(ev.data.source); }
+  else { pending = ev.data.source; }
+}, false);
+if (pending) runSvelte(pending);
+window.addEventListener("error", (e) => showError(e.error || e.message));
+window.addEventListener("unhandledrejection", (e) => showError(e.reason));
+window.parent.postMessage({ type: "IFRAME_READY" }, "*");
+<\/script></body></html>`;
+  }
+  function postSvelteCode(iframe, src) {
+    iframe.contentWindow.postMessage({ type: "RUN_SVELTE", source: src }, "*");
+  }
+
   // ── JSX compile ──
   function normalizeForPreview(src) {
     let s = src.replace(/^\s*import\s[\s\S]*?;\s*$/mg, "");
@@ -592,11 +640,11 @@ window.parent.postMessage({type:"IFRAME_READY"},"*");
     const dragOverlay = el("div", { class: "drag-overlay" },
       el("div", { class: "drag-overlay-icon" }, icon("download", 56)),
       el("div", { class: "drag-overlay-text" }, "\u30D5\u30A1\u30A4\u30EB\u3092\u30C9\u30ED\u30C3\u30D7"),
-      el("div", { class: "drag-overlay-sub" }, "JSX / TSX / JS / HTML / Vue \u2014 \u8907\u6570\u30D5\u30A1\u30A4\u30EB OK")
+      el("div", { class: "drag-overlay-sub" }, "JSX / TSX / JS / HTML / Vue / Svelte \u2014 \u8907\u6570\u30D5\u30A1\u30A4\u30EB OK")
     );
 
     // ── Paste modal ──
-    const pasteTextarea = el("textarea", { placeholder: "JSX / TSX / JS / HTML / Vue \u30B3\u30FC\u30C9\u3092\u8CBC\u308A\u4ED8\u3051..." });
+    const pasteTextarea = el("textarea", { placeholder: "JSX / TSX / JS / HTML / Vue / Svelte \u30B3\u30FC\u30C9\u3092\u8CBC\u308A\u4ED8\u3051..." });
     const pasteNameInput = el("input", {
       class: "sidebar-search", placeholder: "\u30D5\u30A1\u30A4\u30EB\u540D (\u4EFB\u610F)",
       style: { fontSize: "12px" }
@@ -637,7 +685,7 @@ window.parent.postMessage({type:"IFRAME_READY"},"*");
       const inp = document.createElement("input");
       inp.type = "file";
       inp.multiple = true;
-      inp.accept = ".jsx,.js,.mjs,.cjs,.tsx,.ts,.html,.htm,.vue";
+      inp.accept = ".jsx,.js,.mjs,.cjs,.tsx,.ts,.html,.htm,.vue,.svelte";
       inp.onchange = () => { if (inp.files.length) processDroppedFiles(inp.files); };
       inp.click();
     }
@@ -691,7 +739,7 @@ window.parent.postMessage({type:"IFRAME_READY"},"*");
     const welcome = el("div", { class: "welcome" },
       el("div", { class: "welcome-icon" }, icon("zap", 96)),
       el("h2", {}, "DropView"),
-      el("p", {}, "JSX / TSX / JS / HTML / Vue \u30D5\u30A1\u30A4\u30EB\u3092\u753B\u9762\u306B\u30C9\u30ED\u30C3\u30D7\u3059\u308B\u304B\u3001\u30B3\u30FC\u30C9\u3092\u76F4\u63A5\u8CBC\u308A\u4ED8\u3051\u3066\u3001AI\u304C\u751F\u6210\u3057\u305F\u30B3\u30F3\u30DD\u30FC\u30CD\u30F3\u30C8\u3092\u305D\u306E\u5834\u3067\u78BA\u8A8D\u3067\u304D\u307E\u3059\u3002\u8907\u6570\u30D5\u30A1\u30A4\u30EB\u3092\u4E26\u3079\u3066\u6BD4\u8F03\u3082\u53EF\u80FD\u3002"),
+      el("p", {}, "JSX / TSX / JS / HTML / Vue / Svelte \u30D5\u30A1\u30A4\u30EB\u3092\u753B\u9762\u306B\u30C9\u30ED\u30C3\u30D7\u3059\u308B\u304B\u3001\u30B3\u30FC\u30C9\u3092\u76F4\u63A5\u8CBC\u308A\u4ED8\u3051\u3066\u3001AI\u304C\u751F\u6210\u3057\u305F\u30B3\u30F3\u30DD\u30FC\u30CD\u30F3\u30C8\u3092\u305D\u306E\u5834\u3067\u78BA\u8A8D\u3067\u304D\u307E\u3059\u3002\u8907\u6570\u30D5\u30A1\u30A4\u30EB\u3092\u4E26\u3079\u3066\u6BD4\u8F03\u3082\u53EF\u80FD\u3002"),
       el("p", { style: { fontSize: "15px", color: "var(--c-text-3)", maxWidth: "560px", lineHeight: "1.7" } },
         "\u5165\u529B\u3057\u305F\u30D5\u30A1\u30A4\u30EB\u306F\u30A4\u30F3\u30BF\u30FC\u30CD\u30C3\u30C8\u306B\u9001\u4FE1\u3055\u308C\u305A\u3001\u3059\u3079\u3066\u30D6\u30E9\u30A6\u30B6\u5185\u3067\u30ED\u30FC\u30AB\u30EB\u51E6\u7406\u3055\u308C\u307E\u3059\u3002"
       ),
@@ -885,15 +933,29 @@ window.parent.postMessage({type:"IFRAME_READY"},"*");
         iframe.srcdoc = it.jsx;
         return;
       }
+      // 親ページ側にローディングオーバーレイを表示（iframe内スピナー表示前の空白対策）
+      const content = iframe.parentElement;
+      let overlay = content.querySelector(".pane-loading");
+      if (overlay) overlay.remove();
+      if (ft === "svelte" || ft === "vue") {
+        overlay = el("div", { class: "pane-loading" });
+        overlay.innerHTML = '<div class="pl-spinner"></div>' + (ft === "svelte" ? "Svelte コンパイラを読み込み中…" : "Vue を読み込み中…");
+        content.appendChild(overlay);
+      }
       // iframe の load イベントは about:blank 用が先に発火して once リスナーを
       // 消費してしまうため、iframe 内スクリプトから IFRAME_READY を postMessage で
       // 通知してもらい、それを受けてコードを送信する。
       const onReady = (ev) => {
         if (ev.source !== iframe.contentWindow || !ev.data || ev.data.type !== "IFRAME_READY") return;
         window.removeEventListener("message", onReady);
+        if (overlay) { overlay.remove(); overlay = null; }
         if (ft === "vue") {
           try { postVueCode(iframe, it.jsx); } catch (e) {
             iframe.contentWindow.postMessage({ type: "RUN_VUE", template: "", code: `throw new Error(${JSON.stringify((e&&(e.stack||e.message))||String(e))});` }, "*");
+          }
+        } else if (ft === "svelte") {
+          try { postSvelteCode(iframe, it.jsx); } catch (e) {
+            iframe.contentWindow.postMessage({ type: "RUN_SVELTE", source: `<script>throw new Error(${JSON.stringify((e&&(e.stack||e.message))||String(e))})<\/script>` }, "*");
           }
         } else {
           try {
@@ -906,7 +968,7 @@ window.parent.postMessage({type:"IFRAME_READY"},"*");
         }
       };
       window.addEventListener("message", onReady);
-      iframe.srcdoc = ft === "vue" ? makeVueIframeDoc(it.jsx) : makeIframeDoc();
+      iframe.srcdoc = ft === "vue" ? makeVueIframeDoc(it.jsx) : ft === "svelte" ? makeSvelteIframeDoc() : makeIframeDoc();
     }
 
     function reloadPane(id) {
@@ -996,7 +1058,7 @@ window.parent.postMessage({type:"IFRAME_READY"},"*");
     window.addEventListener("dragenter", (e) => { e.preventDefault(); dragCount++; dragOverlay.classList.add("show"); });
     window.addEventListener("dragleave", () => { dragCount--; if (dragCount <= 0) { dragCount = 0; dragOverlay.classList.remove("show"); } });
     window.addEventListener("dragover", (e) => e.preventDefault());
-    const SUPPORTED_RE = /\.(jsx|js|mjs|cjs|tsx|ts|html?|vue)$/i;
+    const SUPPORTED_RE = /\.(jsx|js|mjs|cjs|tsx|ts|html?|vue|svelte)$/i;
 
     // Read files from a directory handle (File System Access API)
     async function readDirHandle(dirHandle) {
