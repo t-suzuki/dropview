@@ -108,7 +108,7 @@
       display: flex; align-items: center; justify-content: center; gap: 5px;
     }
     .sidebar-footer button:hover { background: var(--c-bg-sub); }
-    .sidebar-footer button.danger { color: var(--c-danger); border-color: rgba(239,68,68,.25); }
+    .sidebar-footer button.danger { color: var(--c-danger); border-color: rgba(239,68,68,.25); margin-top: 28px; }
     .sidebar-footer button.danger:hover { background: var(--c-danger-bg); }
 
     .resize-handle {
@@ -692,6 +692,7 @@ window.parent.postMessage({type:"IFRAME_READY"},"*");
       oninput: (e) => { state.query = e.target.value; renderFileList(); }
     });
     const fileListEl = el("div", { class: "file-list" });
+    let selectAllBtn;
 
     // ── File / Folder pickers ──
     function openFilePicker() {
@@ -720,6 +721,13 @@ window.parent.postMessage({type:"IFRAME_READY"},"*");
         el("button", { onclick: openPaste }, icon("clipboard", 14), "\u8CBC\u308A\u4ED8\u3051"),
         el("button", { onclick: openFilePicker }, icon("file", 14), "\u30D5\u30A1\u30A4\u30EB\u3092\u958B\u304F"),
         el("button", { onclick: openFolderPicker }, icon("folder", 14), "\u30D5\u30A9\u30EB\u30C0\u3092\u958B\u304F"),
+        selectAllBtn = el("button", { onclick: () => {
+          if (state.items.length === 0) return;
+          const allSelected = state.items.every(it => state.selected.has(it.id));
+          if (allSelected) { state.selected.clear(); }
+          else { state.items.forEach(it => state.selected.add(it.id)); }
+          renderFileList(); renderMain();
+        }}, icon("check-sm", 14), "\u5168\u9078\u629E"),
         el("button", { class: "danger", onclick: () => {
           if (state.items.length === 0) return;
           state.items = []; state.selected.clear(); state.codeVisible.clear();
@@ -839,6 +847,10 @@ window.parent.postMessage({type:"IFRAME_READY"},"*");
 
     function renderFileList() {
       fileListEl.innerHTML = "";
+      if (selectAllBtn) {
+        const allSelected = state.items.length > 0 && state.items.every(it => state.selected.has(it.id));
+        selectAllBtn.lastChild.textContent = allSelected ? "\u5168\u89E3\u9664" : "\u5168\u9078\u629E";
+      }
       const items = filteredItems();
       if (items.length === 0) {
         fileListEl.appendChild(el("div", { style: { padding: "20px 14px", textAlign: "center", color: "var(--c-text-3)", fontSize: "12px" } },
