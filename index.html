@@ -468,15 +468,21 @@ ${style.replace(/<\/script>/gi, "<\\/script>")}</style>
 </head><body><div id="app"></div>
 <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"><\/script>
 <script>
-window.addEventListener("message",(ev)=>{
-  if(!ev.data||ev.data.type!=="RUN_VUE")return;
-  try{
-    const __TMPL__=ev.data.template;
-    (new Function("Vue","__TMPL__",ev.data.code))(Vue,__TMPL__);
-  }catch(e){
-    document.getElementById("app").innerHTML='<div class="err">'+((e&&(e.stack||e.message))||e)+'<\\/div>';
+(function(){
+  function run(d){
+    try{
+      const __TMPL__=d.template;
+      (new Function("Vue","__TMPL__",d.code))(Vue,__TMPL__);
+    }catch(e){
+      document.getElementById("app").innerHTML='<div class="err">'+((e&&(e.stack||e.message))||e)+'<\\/div>';
+    }
   }
-},false);
+  window.addEventListener("message",function(ev){
+    if(!ev.data||ev.data.type!=="RUN_VUE")return;
+    run(ev.data);
+  },false);
+  window.parent.postMessage({type:"IFRAME_READY"},"*");
+})();
 <\/script></body></html>`;
   }
   function postVueCode(iframe, src) {
@@ -564,6 +570,7 @@ const D=window.__JSX_DEFAULT__;if(!D)throw new Error("No component found.\\nExpe
 if(!root)root=ReactDOM.createRoot(r);root.render(typeof D==="function"?React.createElement(D):D);}catch(e){showError(e);}},false);
 window.addEventListener("error",(e)=>showError(e.error||e.message));
 window.addEventListener("unhandledrejection",(e)=>showError(e.reason));
+window.parent.postMessage({type:"IFRAME_READY"},"*");
 })();
 <\/script></body></html>`;
   }
@@ -858,19 +865,29 @@ window.addEventListener("unhandledrejection",(e)=>showError(e.reason));
       content.appendChild(iframe);
       pane.appendChild(content);
 
+      loadIframe(iframe, it);
+
+      livePanes.set(it.id, { pane, iframe, codeVisible: showCode });
+      return pane;
+    }
+
+    function loadIframe(iframe, it) {
       const ft = fileType(it.name);
       if (ft === "html") {
         iframe.srcdoc = it.jsx;
-      } else if (ft === "vue") {
-        iframe.srcdoc = makeVueIframeDoc(it.jsx);
-        iframe.addEventListener("load", () => {
+        return;
+      }
+      // iframe の load イベントは about:blank 用が先に発火して once リスナーを
+      // 消費してしまうため、iframe 内スクリプトから IFRAME_READY を postMessage で
+      // 通知してもらい、それを受けてコードを送信する。
+      const onReady = (ev) => {
+        if (ev.source !== iframe.contentWindow || !ev.data || ev.data.type !== "IFRAME_READY") return;
+        window.removeEventListener("message", onReady);
+        if (ft === "vue") {
           try { postVueCode(iframe, it.jsx); } catch (e) {
             iframe.contentWindow.postMessage({ type: "RUN_VUE", template: "", code: `throw new Error(${JSON.stringify((e&&(e.stack||e.message))||String(e))});` }, "*");
           }
-        }, { once: true });
-      } else {
-        iframe.srcdoc = makeIframeDoc();
-        iframe.addEventListener("load", () => {
+        } else {
           try {
             const code = compileToRunnableJS(it.jsx, it.name);
             iframe.contentWindow.postMessage({ type: "RUN_JSX", code }, "*");
@@ -878,11 +895,10 @@ window.addEventListener("unhandledrejection",(e)=>showError(e.reason));
             const msg = (e && (e.stack || e.message)) || String(e);
             iframe.contentWindow.postMessage({ type: "RUN_JSX", code: `throw new Error(${JSON.stringify(msg)});` }, "*");
           }
-        }, { once: true });
-      }
-
-      livePanes.set(it.id, { pane, iframe, codeVisible: showCode });
-      return pane;
+        }
+      };
+      window.addEventListener("message", onReady);
+      iframe.srcdoc = ft === "vue" ? makeVueIframeDoc(it.jsx) : makeIframeDoc();
     }
 
     function reloadPane(id) {
@@ -890,28 +906,7 @@ window.addEventListener("unhandledrejection",(e)=>showError(e.reason));
       if (!entry) return;
       const it = state.items.find(x => x.id === id);
       if (!it) return;
-      const ft = fileType(it.name);
-      if (ft === "html") {
-        entry.iframe.srcdoc = it.jsx;
-      } else if (ft === "vue") {
-        entry.iframe.srcdoc = makeVueIframeDoc(it.jsx);
-        entry.iframe.addEventListener("load", () => {
-          try { postVueCode(entry.iframe, it.jsx); } catch (e) {
-            entry.iframe.contentWindow.postMessage({ type: "RUN_VUE", template: "", code: `throw new Error(${JSON.stringify((e&&(e.stack||e.message))||String(e))});` }, "*");
-          }
-        }, { once: true });
-      } else {
-        entry.iframe.srcdoc = makeIframeDoc();
-        entry.iframe.addEventListener("load", () => {
-          try {
-            const code = compileToRunnableJS(it.jsx, it.name);
-            entry.iframe.contentWindow.postMessage({ type: "RUN_JSX", code }, "*");
-          } catch (e) {
-            const msg = (e && (e.stack || e.message)) || String(e);
-            entry.iframe.contentWindow.postMessage({ type: "RUN_JSX", code: `throw new Error(${JSON.stringify(msg)});` }, "*");
-          }
-        }, { once: true });
-      }
+      loadIframe(entry.iframe, it);
     }
 
     function rebuildPaneContent(id) {
@@ -967,9 +962,12 @@ window.addEventListener("unhandledrejection",(e)=>showError(e.reason));
         return;
       }
 
-      // Remove welcome if present, ensure grid is in main
-      while (main.children.length > 1) main.removeChild(main.lastChild);
-      main.appendChild(grid);
+      // Remove welcome if present, ensure grid is in main.
+      // 注意: grid が既に main 内にある場合は appendChild しない。
+      // appendChild は既存の子を一度取り外して再追加するため、
+      // 中の iframe が全てリロードされてしまう。
+      if (main.contains(welcome)) welcome.remove();
+      if (!main.contains(grid)) main.appendChild(grid);
 
       // Diff: remove panes no longer selected
       for (const [id, entry] of livePanes) {
