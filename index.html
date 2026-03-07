@@ -96,10 +96,10 @@
 
     .sidebar-footer {
       padding: 10px 14px; border-top: 1px solid var(--c-border);
-      display: flex; gap: 6px; flex-shrink: 0;
+      display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap;
     }
     .sidebar-footer button {
-      flex: 1; padding: 6px 0; border-radius: var(--radius);
+      flex: 1 1 calc(50% - 3px); padding: 6px 0; border-radius: var(--radius);
       font-size: 11.5px; font-weight: 500; text-align: center;
       border: 1px solid var(--c-border); background: var(--c-bg);
       color: var(--c-text-2); transition: background .12s;
@@ -137,15 +137,6 @@
     .sidebar-toggle:hover { background: var(--c-bg-sub); color: var(--c-text); }
     .topbar-info { flex: 1; font-size: 12px; color: var(--c-text-3); }
     .topbar-hint { font-size: 11px; color: var(--c-text-3); }
-    .topbar-paste {
-      padding: 5px 12px; border-radius: var(--radius);
-      font-size: 12px; font-weight: 500;
-      border: 1px solid var(--c-accent); color: var(--c-accent);
-      background: var(--c-accent-bg); transition: background .12s;
-      display: flex; align-items: center; gap: 5px;
-    }
-    .topbar-paste:hover { background: rgba(37,99,235,.12); }
-
     /* ── Welcome ── */
     .welcome {
       flex: 1; display: flex; flex-direction: column;
@@ -155,7 +146,7 @@
     .welcome-icon { color: var(--c-text-3); opacity: .3; }
     .welcome h2 { font-size: 20px; font-weight: 700; color: var(--c-text); letter-spacing: -.02em; }
     .welcome p { font-size: 13px; color: var(--c-text-2); max-width: 400px; line-height: 1.7; }
-    .welcome-actions { display: flex; gap: 10px; margin-top: 4px; }
+    .welcome-actions { display: flex; gap: 10px; margin-top: 4px; flex-wrap: wrap; justify-content: center; }
     .welcome-btn {
       padding: 10px 24px; border-radius: var(--radius);
       font-size: 13px; font-weight: 600; transition: background .12s, box-shadow .12s;
@@ -325,7 +316,9 @@
       "clipboard":     ["M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2", "M9 2h6a1 1 0 011 1v2a1 1 0 01-1 1H9a1 1 0 01-1-1V3a1 1 0 011-1z"],
       "plus":          ["M12 5v14", "M5 12h14"],
       "file":          ["M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z", "M14 2v6h6", "M16 13H8", "M16 17H8", "M10 9H8"],
+      "folder":        ["M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"],
       "download":      ["M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4", "M7 10l5 5 5-5", "M12 15V3"],
+      "mouse-pointer": ["M2 2L6.7 21.3L9.3 16.9L12.9 22L17.1 19.1L13.5 14L18.5 13z"],
       "zap":           ["M13 2L3 14h9l-1 8 10-12h-9l1-8"],
       "columns":       ["M12 3h7a2 2 0 012 2v14a2 2 0 01-2 2h-7", "M12 3H5a2 2 0 00-2 2v14a2 2 0 002 2h7"],
       "plus-sm":       ["M12 8v8", "M8 12h8"],
@@ -598,6 +591,23 @@ window.addEventListener("unhandledrejection",(e)=>showError(e.reason));
     });
     const fileListEl = el("div", { class: "file-list" });
 
+    // ── File / Folder pickers ──
+    function openFilePicker() {
+      const inp = document.createElement("input");
+      inp.type = "file";
+      inp.multiple = true;
+      inp.accept = ".jsx,.js,.mjs,.cjs,.html,.htm,.vue";
+      inp.onchange = () => { if (inp.files.length) processDroppedFiles(inp.files); };
+      inp.click();
+    }
+    function openFolderPicker() {
+      const inp = document.createElement("input");
+      inp.type = "file";
+      inp.webkitdirectory = true;
+      inp.onchange = () => { if (inp.files.length) processDroppedFiles(inp.files); };
+      inp.click();
+    }
+
     const sidebar = el("div", { class: "sidebar" },
       el("div", { class: "sidebar-head" },
         el("h1", {}, "DropView"),
@@ -606,6 +616,8 @@ window.addEventListener("unhandledrejection",(e)=>showError(e.reason));
       fileListEl,
       el("div", { class: "sidebar-footer" },
         el("button", { onclick: openPaste }, icon("clipboard", 14), "\u8CBC\u308A\u4ED8\u3051"),
+        el("button", { onclick: openFilePicker }, icon("file", 14), "\u30D5\u30A1\u30A4\u30EB\u3092\u958B\u304F"),
+        el("button", { onclick: openFolderPicker }, icon("folder", 14), "\u30D5\u30A9\u30EB\u30C0\u3092\u958B\u304F"),
         el("button", { class: "danger", onclick: () => {
           if (state.items.length === 0) return;
           state.items = []; state.selected.clear(); state.codeVisible.clear();
@@ -628,9 +640,7 @@ window.addEventListener("unhandledrejection",(e)=>showError(e.reason));
     // ── Topbar ──
     const topInfo = el("span", { class: "topbar-info" });
     const topHint = el("span", { class: "topbar-hint" });
-    const pasteBtn = el("button", { class: "topbar-paste", onclick: openPaste }, icon("plus", 14), "\u8CBC\u308A\u4ED8\u3051");
-
-    const topbar = el("div", { class: "topbar" }, topInfo, topHint, pasteBtn);
+    const topbar = el("div", { class: "topbar" }, topInfo, topHint);
 
     // ── Welcome ──
     const welcome = el("div", { class: "welcome" },
@@ -642,7 +652,9 @@ window.addEventListener("unhandledrejection",(e)=>showError(e.reason));
       ),
       el("div", { class: "welcome-actions" },
         el("button", { class: "welcome-btn primary", onclick: openPaste }, icon("clipboard", 16), "\u30B3\u30FC\u30C9\u3092\u8CBC\u308A\u4ED8\u3051"),
-        el("button", { class: "welcome-btn secondary", onclick: () => toast("\u30D5\u30A1\u30A4\u30EB\u3092\u3053\u306E\u753B\u9762\u306B\u30C9\u30E9\u30C3\u30B0\uFF06\u30C9\u30ED\u30C3\u30D7\u3057\u3066\u304F\u3060\u3055\u3044") }, icon("download", 16), "\u30D5\u30A1\u30A4\u30EB\u3092\u30C9\u30ED\u30C3\u30D7")
+        el("button", { class: "welcome-btn secondary", onclick: openFilePicker }, icon("file", 16), "\u30D5\u30A1\u30A4\u30EB\u3092\u958B\u304F"),
+        el("button", { class: "welcome-btn secondary", onclick: openFolderPicker }, icon("folder", 16), "\u30D5\u30A9\u30EB\u30C0\u3092\u958B\u304F"),
+        el("button", { class: "welcome-btn secondary", onclick: () => toast("\u30D5\u30A1\u30A4\u30EB\u3092\u3053\u306E\u753B\u9762\u306B\u30C9\u30E9\u30C3\u30B0\uFF06\u30C9\u30ED\u30C3\u30D7\u3057\u3066\u304F\u3060\u3055\u3044") }, icon("mouse-pointer", 16), "\u30D5\u30A1\u30A4\u30EB\u3092\u30C9\u30ED\u30C3\u30D7")
       ),
       el("div", { style: { marginTop: "12px" } },
         el("button", {
