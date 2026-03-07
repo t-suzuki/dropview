@@ -144,7 +144,7 @@
   <div class="container">
 
     <div class="positioning">
-      DropViewは<strong>「AIが生成したJSX / TSX / Vue / HTMLコンポーネントをドラッグ&ドロップで即座にプレビューする」</strong>という明確なニッチを持つ、単一HTMLファイルで動作するゼロインストールのビューアツールです。
+      DropViewは<strong>「AIが生成したJSX / TSX / Vue / Svelte / HTMLコンポーネントをドラッグ&ドロップで即座にプレビューする」</strong>という明確なニッチを持つ、単一HTMLファイルで動作するゼロインストールのビューアツールです。
     </div>
 
     <!-- ── Category 1 ── -->
@@ -171,7 +171,7 @@
             <tr>
               <td><span class="name"><a href="https://codepen.io/" target="_blank" rel="noopener">CodePen</a></span></td>
               <td>HTML/CSS/JSスニペット共有に特化</td>
-              <td>JSX/TSXの直接サポートなし。Vue SFC非対応</td>
+              <td>JSX/TSXの直接サポートなし。Vue SFC / Svelte非対応</td>
             </tr>
             <tr>
               <td><span class="name"><a href="https://playcode.io/" target="_blank" rel="noopener">Playcode.io</a></span></td>
@@ -187,7 +187,7 @@
         </table>
       </div>
       <div class="advantage">
-        <strong>DropViewの優位性:</strong> これらはすべて「コードを書く場所」。AIが生成したファイルをそのまま放り込んで見る用途にはゼロセットアップ・D&amp;Dで即プレビューのDropViewが最適。
+        <strong>DropViewの優位性:</strong> これらはすべて「コードを書く場所」。AIが生成したファイルをそのまま放り込んで見る用途にはゼロセットアップ・D&amp;Dで即プレビューのDropViewが最適。React / Vue / Svelte / HTMLを単一ツールで横断対応。
       </div>
     </section>
 
@@ -206,13 +206,13 @@
               <td><span class="name"><a href="https://github.com/mokingbird-xyz/mb-viewer-downloads" target="_blank" rel="noopener">MB_viewer</a></span></td>
               <td>デスクトップアプリ (Electron)</td>
               <td>Claude向けを謳う TSX/JSX/HTML ビューア。D&amp;D、複数ファイル比較、ズーム機能</td>
-              <td>インストール必要。Vue非対応。Electron製で重い。DropViewは単一HTMLで即使用可能</td>
+              <td>インストール必要。Vue / Svelte非対応。Electron製で重い。DropViewは単一HTMLで即使用可能</td>
             </tr>
             <tr>
               <td><span class="name"><a href="https://github.com/01esyaLebedeva/tsx_view_edit" target="_blank" rel="noopener">TSX Viewer &amp; Editor</a></span></td>
               <td>デスクトップアプリ (Electron)</td>
               <td>TSXファイルの閲覧・編集。リサイズ可能なパネル</td>
-              <td>TSX専用。JSX/Vue/HTML非対応。Electronインストール必要</td>
+              <td>TSX専用。JSX/Vue/Svelte/HTML非対応。Electronインストール必要</td>
             </tr>
             <tr>
               <td><span class="name"><a href="https://github.com/JoshuaFourie/TSX-Viewer" target="_blank" rel="noopener">TSX-Viewer</a></span></td>
@@ -224,7 +224,7 @@
               <td><span class="name"><a href="https://www.adtechtoolkit.com/tools/jsx-viewer" target="_blank" rel="noopener">JSX Viewer (AdTechToolkit)</a></span></td>
               <td>Webアプリ</td>
               <td>ブラウザ上のMonacoエディタ+ライブプレビュー。マルチタブ。Tailwind対応</td>
-              <td>エディタ型（コード貼り付け）。ファイルD&amp;D非対応。Vue非対応。複数ファイル並列比較なし</td>
+              <td>エディタ型（コード貼り付け）。ファイルD&amp;D非対応。Vue / Svelte非対応。複数ファイル並列比較なし</td>
             </tr>
             <tr>
               <td><span class="name"><a href="https://jsxtool.com/" target="_blank" rel="noopener">JSX Tool</a></span></td>
@@ -236,13 +236,13 @@
               <td><span class="name"><a href="https://chromewebstore.google.com/detail/jsx-preview/kfedoapfmioadaeellmoabmaakojefbl" target="_blank" rel="noopener">JSX Preview (Chrome拡張)</a></span></td>
               <td>Chrome拡張</td>
               <td>ブラウザ上でJSX/TSXファイルをプレビュー</td>
-              <td>Chrome限定。拡張のインストールが必要。複数ファイル比較なし。Vue非対応</td>
+              <td>Chrome限定。拡張のインストールが必要。複数ファイル比較なし。Vue / Svelte非対応</td>
             </tr>
           </tbody>
         </table>
       </div>
       <div class="advantage">
-        <strong>DropViewの優位性:</strong> 直接競合の多くはElectronデスクトップアプリかChrome拡張で、インストールが必要。DropViewは<strong>単一HTMLファイル</strong>でブラウザを開くだけ。さらに<strong>React / Vue / HTMLの横断対応</strong>と<strong>複数ファイル並列比較</strong>を兼ね備えるツールは他にない。
+        <strong>DropViewの優位性:</strong> 直接競合の多くはElectronデスクトップアプリかChrome拡張で、インストールが必要。DropViewは<strong>単一HTMLファイル</strong>でブラウザを開くだけ。さらに<strong>React / Vue / Svelte / HTMLの横断対応</strong>と<strong>複数ファイル並列比較</strong>を兼ね備えるツールは他にない。
       </div>
     </section>
 
@@ -305,7 +305,7 @@
         </table>
       </div>
       <div class="advantage">
-        <strong>DropViewの優位性:</strong> これらは「生成」ツール。DropViewは生成ツールに依存しない<strong>「ビューア」</strong>。Claude、ChatGPT、Gemini等どのAIの出力でも使える汎用性がある。
+        <strong>DropViewの優位性:</strong> これらは「生成」ツール。DropViewは生成ツールに依存しない<strong>「ビューア」</strong>。Claude、ChatGPT、Gemini等どのAIの出力でも使える汎用性があり、React / Vue / Svelte / HTMLを横断対応。
       </div>
     </section>
 
@@ -318,7 +318,7 @@
           <ul>
             <li>ゼロインストール（単一HTMLファイル）</li>
             <li>完全ローカル処理でプライバシー安全</li>
-            <li>JSX / TSX / Vue / HTML 横断対応</li>
+            <li>JSX / TSX / Vue / Svelte / HTML 横断対応</li>
             <li>複数ファイルの並列比較</li>
             <li>オフライン動作可能</li>
           </ul>
@@ -357,7 +357,7 @@
       <p>DropViewは<strong>「AIが生成したコンポーネントを最速で確認する」</strong>というニッチで明確なポジションを持っています。MB_viewer、TSX Viewer、JSX Viewer等の直接競合が存在しますが、いずれもインストールが必要（Electron / Chrome拡張）か、対応形式が限定的です。DropViewの差別化要因:</p>
       <ol>
         <li><strong>単一HTMLファイル</strong> &mdash; 他のどのツールよりも導入障壁が低い</li>
-        <li><strong>マルチフレームワーク対応</strong> &mdash; React / Vue / HTML を1つのツールで横断</li>
+        <li><strong>マルチフレームワーク対応</strong> &mdash; React / Vue / Svelte / HTML を1つのツールで横断</li>
         <li><strong>並列比較</strong> &mdash; 同じUIの異なる実装を並べて見られる</li>
         <li><strong>AI非依存</strong> &mdash; どのAIツールの出力でも使える中立的ビューア</li>
       </ol>
