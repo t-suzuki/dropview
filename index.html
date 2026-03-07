@@ -550,7 +550,7 @@ createApp(__opts__).mount('#app');`;
 @keyframes spin{to{transform:rotate(360deg)}}</style>
 </head><body><div id="app"><div class="loading"><div class="spinner"></div>Svelte \u30B3\u30F3\u30D1\u30A4\u30E9\u3092\u8AAD\u307F\u8FBC\u307F\u4E2D\u2026</div></div>
 <script type="module">
-import { compile } from "https://esm.sh/svelte@4/compiler";
+import { compile } from "https://esm.sh/svelte@5/compiler";
 
 function showError(e) {
   document.getElementById("app").innerHTML = '<div class="err">' + ((e && (e.stack || e.message)) || e) + '<\\/div>';
@@ -560,8 +560,9 @@ function runSvelte(src) {
   try {
     const result = compile(src, { css: "injected", filename: "Component.svelte" });
     let code = result.js.code
-      .replace(/(from\\s*|import\\s*)["']svelte(\\/[\\w./-]+)?["']/g, (m, pre, sub) => pre + '"https://esm.sh/svelte@4' + (sub || '') + '"');
-    code += "\\nnew Component({ target: document.getElementById('app') });";
+      .replace(/(from\\s*|import\\s*)["']svelte(\\/[\\w./-]+)?["']/g, (m, pre, sub) => pre + '"https://esm.sh/svelte@5' + (sub || '') + '"');
+    code += "\\nimport { mount } from \\"https://esm.sh/svelte@5\\";";
+    code += "\\nmount(Component, { target: document.getElementById('app') });";
     document.getElementById("app").innerHTML = "";
     const s = document.createElement("script");
     s.type = "module";

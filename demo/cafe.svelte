@@ -1,7 +1,7 @@
 <script>
   import { fade } from 'svelte/transition';
 
-  let activeCategory = 'Lunch';
+  let activeCategory = $state('Lunch');
 
   const categories = ['Lunch', 'Side', 'Drink'];
 
@@ -15,7 +15,7 @@
     { name: 'クラフトビール', price: 750, desc: '日替わり地ビール', category: 'Drink' },
   ];
 
-  $: filteredItems = items.filter(i => i.category === activeCategory);
+  let filteredItems = $derived(items.filter(i => i.category === activeCategory));
 </script>
 
 <div class="page">
@@ -39,7 +39,7 @@
         <button
           class="tab"
           class:active={activeCategory === cat}
-          on:click={() => activeCategory = cat}
+          onclick={() => activeCategory = cat}
         >{cat}</button>
       {/each}
     </div>
