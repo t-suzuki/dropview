@@ -137,6 +137,8 @@
     .sidebar-toggle:hover { background: var(--c-bg-sub); color: var(--c-text); }
     .topbar-info { flex: 1; font-size: 12px; color: var(--c-text-3); }
     .topbar-hint { font-size: 11px; color: var(--c-text-3); }
+    .topbar-gh { color: #24292f; display: flex; align-items: center; margin-left: 4px; opacity: 0.6; transition: opacity 0.15s; }
+    .topbar-gh:hover { opacity: 1; }
     /* ── Welcome ── */
     .welcome {
       flex: 1; display: flex; flex-direction: column;
@@ -339,6 +341,7 @@
       "columns":       ["M12 3h7a2 2 0 012 2v14a2 2 0 01-2 2h-7", "M12 3H5a2 2 0 00-2 2v14a2 2 0 002 2h7"],
       "plus-sm":       ["M12 8v8", "M8 12h8"],
       "check-sm":      ["M20 6L9 17l-5-5"],
+      "github":        ["M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"],
     };
     for (const d of (paths[name] || [])) {
       const p = document.createElementNS(svgNs, "path");
@@ -677,7 +680,11 @@ window.parent.postMessage({type:"IFRAME_READY"},"*");
     // ── Topbar ──
     const topInfo = el("span", { class: "topbar-info" });
     const topHint = el("span", { class: "topbar-hint" });
-    const topbar = el("div", { class: "topbar" }, topInfo, topHint);
+    const ghLink = el("a", {
+      class: "topbar-gh", href: "https://github.com/t-suzuki/dropview",
+      target: "_blank", rel: "noopener", title: "GitHub"
+    }, icon("github", 18));
+    const topbar = el("div", { class: "topbar" }, topInfo, topHint, ghLink);
 
     // ── Welcome ──
     const welcome = el("div", { class: "welcome" },
