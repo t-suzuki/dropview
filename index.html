@@ -69,11 +69,12 @@
     }
     /* circle toggle: always visible, left of file icon */
     .file-item .fi-toggle {
-      width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+      width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
       display: grid; place-items: center;
       border: 1.5px solid var(--c-border); background: var(--c-bg);
       color: var(--c-text-3); transition: border-color .12s, background .12s, color .12s;
     }
+    .file-item .fi-toggle svg { stroke-width: 2.5; }
     .file-item .fi-toggle:hover { border-color: var(--c-accent); color: var(--c-accent); }
     .file-item .fi-toggle.checked {
       border-color: var(--c-accent); background: var(--c-accent); color: #fff;
@@ -143,9 +144,11 @@
     /* ── Welcome ── */
     .welcome {
       flex: 1; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 28px;
+      align-items: center; gap: 28px;
       padding: 64px; text-align: center; background: var(--c-bg-sub);
+      overflow-y: auto;
     }
+    @media (min-height: 700px) { .welcome { justify-content: center; } }
     .welcome-icon { color: var(--c-text-3); opacity: .3; }
     .welcome h2 { font-size: 40px; font-weight: 700; color: var(--c-text); letter-spacing: -.02em; }
     .welcome p { font-size: 18px; color: var(--c-text-2); max-width: 560px; line-height: 1.7; }
@@ -180,6 +183,15 @@
       background: var(--c-bg-sub); border: 1px solid var(--c-border);
       font-family: ui-monospace, monospace; font-size: 13px; color: var(--c-text);
       line-height: 1.6; white-space: pre-wrap; word-break: break-all;
+    }
+    @media (max-height: 600px), (max-width: 480px) {
+      .welcome { padding: 24px 16px; gap: 16px; }
+      .welcome-icon svg { width: 48px; height: 48px; }
+      .welcome h2 { font-size: 28px; }
+      .welcome p { font-size: 15px; }
+      .welcome-btn { padding: 12px 20px; font-size: 14px; }
+      .welcome-actions { gap: 10px; }
+      .welcome-tip { padding: 16px 18px; margin-top: 12px; }
     }
 
     /* ── Drag overlay ── */
@@ -343,7 +355,7 @@
       "mouse-pointer": ["M2 2L6.7 21.3L9.3 16.9L12.9 22L17.1 19.1L13.5 14L18.5 13z"],
       "zap":           ["M13 2L3 14h9l-1 8 10-12h-9l1-8"],
       "columns":       ["M12 3h7a2 2 0 012 2v14a2 2 0 01-2 2h-7", "M12 3H5a2 2 0 00-2 2v14a2 2 0 002 2h7"],
-      "plus-sm":       ["M12 8v8", "M8 12h8"],
+      "plus-sm":       ["M12 6v12", "M6 12h12"],
       "check-sm":      ["M20 6L9 17l-5-5"],
       "github":        ["M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"],
     };
@@ -847,7 +859,7 @@ window.parent.postMessage({type:"IFRAME_READY"},"*");
             renderFileList();
             renderMain();
           }
-        }, icon(active ? "check-sm" : "plus-sm", 12));
+        }, icon(active ? "check-sm" : "plus-sm", 14));
 
         const delBtn = el("button", { class: "fi-del", title: "\u524A\u9664", onclick: (e) => {
           e.stopPropagation();
