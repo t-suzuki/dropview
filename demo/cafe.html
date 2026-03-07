@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Haze Coffee</title>
+  <style>
+    * { margin: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0ebe3; color: #2d2a26; }
+    header {
+      background: linear-gradient(160deg, #6b8f71 0%, #3d5a40 100%);
+      color: #fff; text-align: center; padding: 56px 24px;
+    }
+    header svg { margin-bottom: 16px; }
+    header h1 { font-size: 26px; font-weight: 700; letter-spacing: 0.04em; }
+    header p { font-size: 13px; opacity: 0.8; margin-top: 8px; }
+    .section-title {
+      text-align: center; font-size: 18px; font-weight: 700;
+      padding: 36px 0 20px; color: #3d5a40;
+    }
+    .menu { max-width: 500px; margin: 0 auto; padding: 0 24px 40px; }
+    .menu-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 0; border-bottom: 1px solid #d6cdbf;
+    }
+    .menu-item .icon {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: #3d5a40; display: grid; place-items: center; flex-shrink: 0;
+    }
+    .menu-item .name { font-weight: 600; font-size: 14px; }
+    .menu-item .desc { font-size: 11px; color: #7a7368; margin-top: 2px; }
+    .menu-item .price {
+      margin-left: auto; font-weight: 700; color: #3d5a40;
+      font-size: 15px; white-space: nowrap;
+    }
+    .cta {
+      display: block; width: fit-content; margin: 0 auto 40px;
+      background: #3d5a40; color: #fff; border: none; border-radius: 24px;
+      padding: 12px 32px; font-size: 14px; font-weight: 600; cursor: pointer;
+    }
+    .cta:hover { background: #2e4830; }
+    footer {
+      text-align: center; padding: 32px; font-size: 11px;
+      color: #a09888; border-top: 1px solid #d6cdbf;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+      <path d="M30 5 L35 20 H45 L37 28 L40 43 L30 35 L20 43 L23 28 L15 20 H25 Z" stroke="#c8e0ca" stroke-width="1.5" fill="none" />
+      <circle cx="30" cy="30" r="26" stroke="#c8e0ca" stroke-width="2" fill="none" />
+      <path d="M22 36c0-5 4-10 8-10s8 5 8 10" stroke="#c8e0ca" stroke-width="2" stroke-linecap="round" fill="none" />
+    </svg>
+    <h1>Haze Coffee</h1>
+    <p>霞の向こうに、香り立つ一杯</p>
+  </header>
+
+  <div class="section-title">Menu</div>
+  <div class="menu">
+    <div class="menu-item">
+      <div class="icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c8e0ca" stroke-width="2" stroke-linecap="round">
+          <path d="M18 8h2a2 2 0 012 2v1a2 2 0 01-2 2h-2M4 8h14v9a4 4 0 01-4 4H8a4 4 0 01-4-4V8z"/>
+        </svg>
+      </div>
+      <div>
+        <div class="name">House Blend</div>
+        <div class="desc">毎朝焙煎するオリジナルブレンド</div>
+      </div>
+      <span class="price">¥420</span>
+    </div>
+    <div class="menu-item">
+      <div class="icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c8e0ca" stroke-width="2" stroke-linecap="round">
+          <path d="M8 2v4M16 2v4M6 6h12v14a2 2 0 01-2 2H8a2 2 0 01-2-2V6z"/>
+        </svg>
+      </div>
+      <div>
+        <div class="name">Iced Mocha</div>
+        <div class="desc">ビターチョコとエスプレッソ</div>
+      </div>
+      <span class="price">¥580</span>
+    </div>
+    <div class="menu-item">
+      <div class="icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c8e0ca" stroke-width="2" stroke-linecap="round">
+          <path d="M12 2l3 7h7l-6 4 2 7-6-4-6 4 2-7-6-4h7z"/>
+        </svg>
+      </div>
+      <div>
+        <div class="name">Seasonal Special</div>
+        <div class="desc">季節のフルーツを使った限定ドリンク</div>
+      </div>
+      <span class="price">¥650</span>
+    </div>
+    <div class="menu-item">
+      <div class="icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c8e0ca" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>
+        </svg>
+      </div>
+      <div>
+        <div class="name">Morning Set</div>
+        <div class="desc">トースト + ドリップコーヒー</div>
+      </div>
+      <span class="price">¥750</span>
+    </div>
+  </div>
+
+  <button class="cta" onclick="alert('ご来店をお待ちしております!')">Find Us</button>
+
+  <footer>
+    <p>Open 7:00 - 17:00 / Closed on Tuesdays</p>
+  </footer>
+</body>
+</html>
