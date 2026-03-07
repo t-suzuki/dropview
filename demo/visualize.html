@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>スギ花粉 — 都心 vs 郊外</title>
+  <style>
+    * { margin: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; color: #0f172a; }
+    header { background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%); color: #fff; padding: 36px 24px; text-align: center; }
+    header h1 { font-size: 22px; font-weight: 700; }
+    header p { font-size: 13px; opacity: 0.8; margin-top: 6px; }
+    .container { max-width: 720px; margin: 0 auto; padding: 28px 20px; }
+    h2 { font-size: 16px; font-weight: 700; color: #1e3a5f; margin-bottom: 16px; text-align: center; }
+
+    .summary { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+    .summary-card {
+      padding: 20px; border-radius: 12px; text-align: center;
+      border: 1px solid #e2e8f0;
+    }
+    .summary-card.urban { background: linear-gradient(135deg, #eff6ff, #dbeafe); }
+    .summary-card.suburban { background: linear-gradient(135deg, #f0fdf4, #dcfce7); }
+    .summary-label { font-size: 12px; color: #64748b; font-weight: 500; }
+    .summary-value { font-size: 32px; font-weight: 800; margin: 6px 0 2px; }
+    .summary-card.urban .summary-value { color: #2563eb; }
+    .summary-card.suburban .summary-value { color: #16a34a; }
+    .summary-unit { font-size: 11px; color: #94a3b8; }
+    .summary-ratio { font-size: 13px; color: #f97316; font-weight: 700; text-align: center; margin-bottom: 24px; }
+
+    .chart-area { position: relative; margin-bottom: 28px; }
+    .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .bar-label { width: 56px; font-size: 12px; font-weight: 600; text-align: right; flex-shrink: 0; }
+    .bar-track { flex: 1; height: 28px; background: #f1f5f9; border-radius: 6px; overflow: hidden; position: relative; }
+    .bar-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 8px; transition: width 0.6s ease-out; }
+    .bar-fill span { font-size: 10px; font-weight: 700; color: #fff; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,.2); }
+    .bar-fill.urban { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+    .bar-fill.suburban { background: linear-gradient(90deg, #16a34a, #4ade80); }
+
+    .divider { height: 1px; background: #e2e8f0; margin: 8px 0 8px 64px; }
+    .legend-row { display: flex; gap: 20px; justify-content: center; margin-bottom: 16px; font-size: 12px; color: #64748b; }
+    .legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: middle; }
+
+    .takeaway { padding: 16px 20px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; margin-top: 4px; }
+    .takeaway h3 { font-size: 14px; margin-bottom: 8px; }
+    .takeaway p { font-size: 13px; line-height: 1.7; color: #44403c; }
+    .source { font-size: 11px; color: #94a3b8; text-align: center; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🌲 スギ花粉 — 都心 vs 郊外</h1>
+    <p>累積飛散量で見る地域格差（2025年 1月〜3月初旬）</p>
+  </header>
+
+  <div class="container">
+    <div class="summary">
+      <div class="summary-card urban">
+        <div class="summary-label">区部（都心5地点）平均</div>
+        <div class="summary-value">1,210</div>
+        <div class="summary-unit">個/cm²</div>
+      </div>
+      <div class="summary-card suburban">
+        <div class="summary-label">市部（郊外7地点）平均</div>
+        <div class="summary-value">6,018</div>
+        <div class="summary-unit">個/cm²</div>
+      </div>
+    </div>
+    <div class="summary-ratio">郊外は都心の約 <span style="font-size:18px">5.0倍</span> の花粉が飛散</div>
+
+    <h2>地点別 累積飛散量</h2>
+    <div class="legend-row">
+      <span><span class="legend-dot" style="background:#3b82f6"></span>区部</span>
+      <span><span class="legend-dot" style="background:#16a34a"></span>市部</span>
+    </div>
+
+    <div class="chart-area" id="chart"></div>
+
+    <div class="takeaway">
+      <h3>💡 Key Takeaway</h3>
+      <p>
+        青梅の累積飛散量は <strong>14,300 個/cm²</strong> で、千代田区の約 <strong>11.8 倍</strong>。
+        西に行くほど山林に近く花粉源に直面するため、飛散量が桁違いに多くなります。
+        花粉症対策は「どこに住んでいるか」で大きく変わることがこのデータから読み取れます。
+      </p>
+    </div>
+    <p class="source">出典: 東京都福祉保健局「東京都のスギ花粉飛散データ」</p>
+  </div>
+
+  <script>
+    const stations = [
+      { name: "千代田", val: 1214.8, area: "urban" },
+      { name: "葛飾",   val: 1249.1, area: "urban" },
+      { name: "杉並",   val: 1245.1, area: "urban" },
+      { name: "北",     val: 1117.0, area: "urban" },
+      { name: "大田",   val: 1223.1, area: "urban" },
+      { name: "府中",   val: 2699.4, area: "suburban" },
+      { name: "小平",   val: 3773.5, area: "suburban" },
+      { name: "町田",   val: 4036.1, area: "suburban" },
+      { name: "多摩",   val: 4607.4, area: "suburban" },
+      { name: "八王子", val: 4524.1, area: "suburban" },
+      { name: "立川",   val: 8188.9, area: "suburban" },
+      { name: "青梅",   val: 14300.0, area: "suburban" },
+    ];
+    const maxVal = 14300;
+    const chart = document.getElementById("chart");
+    let urbanDone = false;
+
+    stations.forEach((s, i) => {
+      if (!urbanDone && s.area === "suburban") {
+        urbanDone = true;
+        const div = document.createElement("div");
+        div.className = "divider";
+        chart.appendChild(div);
+      }
+      const row = document.createElement("div");
+      row.className = "bar-row";
+      const pct = (s.val / maxVal * 100).toFixed(1);
+      row.innerHTML = `
+        <div class="bar-label">${s.name}</div>
+        <div class="bar-track">
+          <div class="bar-fill ${s.area}" style="width: 0%">
+            <span>${s.val.toLocaleString()}</span>
+          </div>
+        </div>
+      `;
+      chart.appendChild(row);
+      // Animate
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          row.querySelector(".bar-fill").style.width = Math.max(pct, 6) + "%";
+        });
+      });
+    });
+  </script>
+</body>
+</html>
