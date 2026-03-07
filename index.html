@@ -1046,19 +1046,19 @@ window.addEventListener("unhandledrejection",(e)=>showError(e.reason));
 
       if (supportsHandle) {
         // Modern: File System Access API
+        // Grab all handles synchronously before any await (handles expire after the event)
+        const handlePromises = dtItems.map(item => item.getAsFileSystemHandle().catch(() => null));
         (async () => {
+          const handles = await Promise.all(handlePromises);
           const allFiles = [];
-          for (const item of dtItems) {
-            try {
-              const handle = await item.getAsFileSystemHandle();
-              if (!handle) continue;
-              if (handle.kind === "directory") {
-                allFiles.push(...await readDirHandle(handle));
-              } else if (handle.kind === "file") {
-                const f = await handle.getFile();
-                if (SUPPORTED_RE.test(f.name)) allFiles.push(f);
-              }
-            } catch {}
+          for (const handle of handles) {
+            if (!handle) continue;
+            if (handle.kind === "directory") {
+              allFiles.push(...await readDirHandle(handle));
+            } else if (handle.kind === "file") {
+              const f = await handle.getFile();
+              if (SUPPORTED_RE.test(f.name)) allFiles.push(f);
+            }
           }
           processDroppedFiles(allFiles);
         })();
